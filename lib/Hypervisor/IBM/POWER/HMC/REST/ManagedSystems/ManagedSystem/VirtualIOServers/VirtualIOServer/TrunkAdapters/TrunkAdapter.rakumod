@@ -33,6 +33,9 @@ has     URI                                         @.AssociatedVirtualSwitch;
 has     Str                                         $.VirtualSwitchID;
 has     Str                                         $.DeviceName;
 has     Str                                         $.TrunkPriority;
+has     Str                                         $.HCNID;
+
+# HCNID not implemented
 
 method  xml-name-exceptions () { return set <Metadata>; }
 
@@ -76,6 +79,7 @@ method load () {
     $!VirtualSwitchID                       = self.etl-text(:TAG<VirtualSwitchID>,                                      :$!xml);
     $!DeviceName                            = self.etl-text(:TAG<DeviceName>,                                           :$!xml);
     $!TrunkPriority                         = self.etl-text(:TAG<TrunkPriority>,                                        :$!xml);
+    $!HCNID                                 = self.etl-text(:TAG<HCNID>,                                                :$!xml, :optional);
     $!xml                                   = Nil;
     $!loaded                                = True;
     self;
