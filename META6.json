@@ -70,7 +70,7 @@
     "Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::VirtualSCSIMappings": "lib/Hypervisor/IBM/POWER/HMC/REST/ManagedSystems/ManagedSystem/VirtualIOServers/VirtualIOServer/VirtualSCSIMappings.rakumod"
   },
   "resources":       [],
-  "source-url":      "",
+  "source-url":      "https://github.com/markldevine/raku-Hypervisor-IBM-POWER-HMC-REST-ManagedSystems-VirtualIOServers.git",
   "tags":            [
     "HMC",
     "REST"
