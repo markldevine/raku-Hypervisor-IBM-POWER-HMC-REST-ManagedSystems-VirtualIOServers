@@ -2,6 +2,9 @@
   "auth":           "github:markldevine",
   "authors":        [ "Mark Devine <mark@markdevine.com>" ],
   "depends":        [
+    "Hypervisor::IBM::POWER::HMC::REST::Atom",
+    "Hypervisor::IBM::POWER::HMC::REST::Config",
+    "Hypervisor::IBM::POWER::HMC::REST::ETL",
     "LibXML",
     "URI"
   ],
