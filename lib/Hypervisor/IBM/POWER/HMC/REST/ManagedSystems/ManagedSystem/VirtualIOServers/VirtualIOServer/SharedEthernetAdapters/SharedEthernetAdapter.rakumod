@@ -56,7 +56,7 @@ method init () {
     $!BackingDeviceChoice   = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::BackingDeviceChoice.new(:$!config, :xml(self.etl-branch(:TAG<BackingDeviceChoice>, :$!xml)));
     $!TrunkAdapters         = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::TrunkAdapters.new(:$!config, :xml(self.etl-branch(:TAG<TrunkAdapters>, :$!xml)));
     $!IPInterface           = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::IPInterface.new(:$!config, :xml(self.etl-branch(:TAG<IPInterface>, :$!xml)));
-    self.load               if self.config.optimization-init-load;
+    self.load               if self.config.optimizations.init-load;
     $!initialized           = True;
     self;
 }

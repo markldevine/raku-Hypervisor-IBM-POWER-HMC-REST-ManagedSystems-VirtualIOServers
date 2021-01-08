@@ -41,7 +41,7 @@ method init () {
     for self.etl-branches(:TAG<VirtualOpticalMedia>, :$!xml, :optional) -> $vom {
         @!VirtualOpticalMedia.push: Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::MediaRepositories::VirtualMediaRepository::OpticalMedia::VirtualOpticalMedia.new(:$!config, :xml($vom));
     }
-    self.load               if self.config.optimization-init-load;
+    self.load               if self.config.optimizations.init-load;
     $!initialized           = True;
     self;
 }

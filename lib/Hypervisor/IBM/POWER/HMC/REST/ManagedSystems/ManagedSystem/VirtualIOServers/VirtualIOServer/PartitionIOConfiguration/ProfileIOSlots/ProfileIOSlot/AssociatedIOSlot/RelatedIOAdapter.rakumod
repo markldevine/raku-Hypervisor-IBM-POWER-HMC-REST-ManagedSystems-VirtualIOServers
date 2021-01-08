@@ -50,7 +50,7 @@ method init () {
         if $!xml-IOAdapter;
     $!PhysicalFibreChannelAdapter       = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIOAdapter::PhysicalFibreChannelAdapter.new(:$!config, :xml($!xml-PhysicalFibreChannelAdapter))
         if $!xml-PhysicalFibreChannelAdapter;
-    self.load                           if self.config.optimization-init-load;
+    self.load                           if self.config.optimizations.init-load;
     $!initialized                       = True;
     self;
 }

@@ -42,7 +42,7 @@ method init () {
     for self.etl-branches(:TAG<TrunkAdapter>, :$!xml) -> $ta {
         @!TrunkAdapter.push: Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::TrunkAdapters::TrunkAdapter.new(:$!config, :xml($ta));
     }
-    self.load               if self.config.optimization-init-load;
+    self.load               if self.config.optimizations.init-load;
     $!initialized           = True;
     self;
 }

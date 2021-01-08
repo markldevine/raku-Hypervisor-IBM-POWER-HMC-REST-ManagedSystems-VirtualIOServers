@@ -42,7 +42,7 @@ method init () {
     for self.etl-branches(:TAG<PhysicalVolume>, :$!xml) -> $physical-volume {
         @!PhysicalVolume.push: Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PhysicalVolumes::PhysicalVolume.new(:$!config, :xml($physical-volume));
     }
-    self.load               if self.config.optimization-init-load;
+    self.load               if self.config.optimizations.init-load;
     $!initialized           = True;
     self;
 }

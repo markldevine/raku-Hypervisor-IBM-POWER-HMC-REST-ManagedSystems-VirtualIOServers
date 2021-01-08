@@ -49,7 +49,7 @@ method init () {
     self.config.diag.post:          self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
     $!xml-PhysicalFibreChannelPorts = self.etl-branch(:TAG<PhysicalFibreChannelPorts>, :$!xml);
     $!PhysicalFibreChannelPorts     = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIOAdapter::PhysicalFibreChannelAdapter::PhysicalFibreChannelPorts.new(:$!config, :xml($!xml-PhysicalFibreChannelPorts));
-    self.load                       if self.config.optimization-init-load;
+    self.load                       if self.config.optimizations.init-load;
     $!initialized                   = True;
     self;
 }

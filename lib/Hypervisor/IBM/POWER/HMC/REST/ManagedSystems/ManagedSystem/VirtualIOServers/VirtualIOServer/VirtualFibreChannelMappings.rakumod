@@ -42,7 +42,7 @@ method init () {
     for self.etl-branches(:TAG<VirtualFibreChannelMapping>, :$!xml) -> $vfcm {
         @!VirtualFibreChannelMapping.push: Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::VirtualFibreChannelMappings::VirtualFibreChannelMapping.new(:$!config, :xml($vfcm));
     }
-    self.load               if self.config.optimization-init-load;
+    self.load               if self.config.optimizations.init-load;
     $!initialized           = True;
     self;
 }

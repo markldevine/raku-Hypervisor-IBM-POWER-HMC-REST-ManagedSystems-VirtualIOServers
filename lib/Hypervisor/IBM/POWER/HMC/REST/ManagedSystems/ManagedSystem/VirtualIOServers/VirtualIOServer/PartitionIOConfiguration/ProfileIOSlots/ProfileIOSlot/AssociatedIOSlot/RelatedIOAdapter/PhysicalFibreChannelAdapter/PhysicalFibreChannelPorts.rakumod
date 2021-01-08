@@ -42,7 +42,7 @@ method init () {
     for self.etl-branches(:TAG<PhysicalFibreChannelPort>, :$!xml) -> $pfcp {
         @!PhysicalFibreChannelPort.push: Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIOAdapter::PhysicalFibreChannelAdapter::PhysicalFibreChannelPorts::PhysicalFibreChannelPort.new(:$!config, :xml($pfcp));
     }
-    self.load               if self.config.optimization-init-load;
+    self.load               if self.config.optimizations.init-load;
     $!initialized           = True;
     self;
 }

@@ -48,7 +48,7 @@ method init () {
     $!ClientAdapter         = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::VirtualFibreChannelMappings::VirtualFibreChannelMapping::ClientAdapter.new(:$!config, :xml(self.etl-branch(:TAG<ClientAdapter>,    :$!xml, :optional)));
     $!Port                  = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::VirtualFibreChannelMappings::VirtualFibreChannelMapping::Port.new(:$!config,          :xml(self.etl-branch(:TAG<Port>,             :$!xml, :optional)));
     $!ServerAdapter         = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::VirtualFibreChannelMappings::VirtualFibreChannelMapping::ServerAdapter.new(:$!config, :xml(self.etl-branch(:TAG<ServerAdapter>,    :$!xml)));
-    self.load               if self.config.optimization-init-load;
+    self.load               if self.config.optimizations.init-load;
     $!initialized           = True;
     self;
 }

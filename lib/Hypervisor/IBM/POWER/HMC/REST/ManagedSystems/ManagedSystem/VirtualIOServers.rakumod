@@ -70,7 +70,7 @@ method init () {
         %!Id-to-Virtual-IO-Server-Name{$id} = $Virtual-IO-Server-Name;
     }
     $!initialized           = True;
-    self.load               if self.config.optimization-init-load;
+    self.load               if self.config.optimizations.init-load;
     self.config.diag.post:  sprintf("%-20s %10s: %11s", self.^name.subst(/^.+'::'(.+)$/, {$0}), 'INITIALIZE', sprintf("%.3f", now - $init-start)) if %*ENV<HIPH_INIT>;
     self;
 }

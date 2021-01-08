@@ -41,7 +41,7 @@ method init () {
     for self.etl-branches(:TAG<SharedEthernetAdapter>, :$!xml) -> $sea {
         @!SharedEthernetAdapter.push: Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter.new(:$!config, :xml($sea));
     }
-    self.load               if self.config.optimization-init-load;
+    self.load               if self.config.optimizations.init-load;
     $!initialized           = True;
     self;
 }

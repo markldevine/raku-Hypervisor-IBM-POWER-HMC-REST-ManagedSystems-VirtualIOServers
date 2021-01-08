@@ -69,7 +69,7 @@ method init () {
     $!xml-RelatedIOAdapter  = self.etl-branch(:TAG<RelatedIOAdapter>,   :$!xml);
     $!RelatedIBMiIOSlot     = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIBMiIOSlot.new(:$!config,    :xml($!xml-RelatedIBMiIOSlot));
     $!RelatedIOAdapter      = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIOAdapter.new(:$!config,     :xml($!xml-RelatedIOAdapter));
-    self.load               if self.config.optimization-init-load;
+    self.load               if self.config.optimizations.init-load;
     $!initialized           = True;
     self;
 }

@@ -41,7 +41,7 @@ method init () {
     for self.etl-branches(:TAG<ProfileIOSlot>, :$!xml) -> $pios {
         @!ProfileIOSlot.push: Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot.new(:$!config, :xml($pios));
     }
-    self.load               if self.config.optimization-init-load;
+    self.load               if self.config.optimizations.init-load;
     $!initialized           = True;
     self;
 }

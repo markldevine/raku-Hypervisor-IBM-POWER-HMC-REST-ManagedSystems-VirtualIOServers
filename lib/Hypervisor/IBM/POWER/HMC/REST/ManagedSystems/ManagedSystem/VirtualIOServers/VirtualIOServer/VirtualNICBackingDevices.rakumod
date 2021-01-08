@@ -42,7 +42,7 @@ method init () {
     for self.etl-branches(:TAG<VirtualNICBackingDeviceChoice>, :$!xml) -> $vnicbdc {
         @!VirtualNICBackingDeviceChoice.push: Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::VirtualNICBackingDevices::VirtualNICBackingDeviceChoice.new(:$!config, :xml($vnicbdc));
     }
-    self.load               if self.config.optimization-init-load;
+    self.load               if self.config.optimizations.init-load;
     $!initialized           = True;
     self;
 }

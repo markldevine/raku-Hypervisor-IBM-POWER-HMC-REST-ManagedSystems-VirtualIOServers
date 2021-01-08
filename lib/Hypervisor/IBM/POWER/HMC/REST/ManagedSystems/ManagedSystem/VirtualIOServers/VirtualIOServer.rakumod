@@ -189,7 +189,7 @@ method init () {
     $!FreeEthenetBackingDevicesForSEA       = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::FreeEthenetBackingDevicesForSEA.new(:$!config, :xml($!xml-FreeEthenetBackingDevicesForSEA));
     $!VirtualNICBackingDevices              = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::VirtualNICBackingDevices.new(:$!config, :xml($!xml-VirtualNICBackingDevices));
     $!VirtualIOServerCapabilities           = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::VirtualIOServerCapabilities.new(:$!config, :xml($!xml-VirtualIOServerCapabilities));
-    self.load                               if self.config.optimization-init-load;
+    self.load                               if self.config.optimizations.init-load;
     $!initialized                           = True;
     self;
 }
