@@ -2,6 +2,7 @@ need    Hypervisor::IBM::POWER::HMC::REST::Config;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Analyze;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Dump;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Optimize;
+use     Hypervisor::IBM::POWER::HMC::REST::Config::Traits;
 need    Hypervisor::IBM::POWER::HMC::REST::ETL::XML;
 need    Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer;
 unit    class Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers:api<1>:auth<Mark Devine (mark@markdevine.com)>
@@ -10,15 +11,13 @@ unit    class Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::
             does Hypervisor::IBM::POWER::HMC::REST::Config::Optimize
             does Hypervisor::IBM::POWER::HMC::REST::ETL::XML;
 
-my      Bool                                                                                                $names-checked = False;
-my      Bool                                                                                                $analyzed = False;
-my      Lock                                                                                                $lock = Lock.new;
-
-has     Hypervisor::IBM::POWER::HMC::REST::Config                                                           $.config is required;
-has     Bool                                                                                                $.initialized = False;
-has     Bool                                                                                                $.loaded = False;
+my      Bool                                                                                                $names-checked  = False;
+my      Bool                                                                                                $analyzed       = False;
+my      Lock                                                                                                $lock           = Lock.new;
+has     Hypervisor::IBM::POWER::HMC::REST::Config                                                           $.config        is required;
+has     Bool                                                                                                $.initialized   = False;
 has                                                                                                         $.Managed-System-Id is required;
-has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer %.Virtual-IO-Servers;
+has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer %.Virtual-IO-Servers    is conditional-initialization-attribute;
 has                                                                                                         @.Virtual-IO-Server-Ids;
 has                                                                                                         %.Virtual-IO-Server-Name-to-Id;
 has                                                                                                         %.Id-to-Virtual-IO-Server-Name;
@@ -34,13 +33,13 @@ submethod TWEAK {
         if !$names-checked      { $proceed-with-name-check = True; $names-checked = True; }
     });
     self.etl-node-name-check    if $proceed-with-name-check;
-#   self.init;
     self.analyze                if $proceed-with-analyze;
     self;
 }
 
 method init () {
     return self             if $!initialized;
+    return self             unless self.attribute-is-accessed(self.^name, 'Virtual-IO-Servers');
     self.config.diag.post:  self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
     my $init-start          = now;
     my $fetch-start         = now;
@@ -69,30 +68,9 @@ method init () {
         %!Virtual-IO-Server-Name-to-Id{$Virtual-IO-Server-Name} = $id;
         %!Id-to-Virtual-IO-Server-Name{$id} = $Virtual-IO-Server-Name;
     }
-    $!initialized           = True;
-    self.load               if self.config.optimizations.init-load;
-    self.config.diag.post:  sprintf("%-20s %10s: %11s", self.^name.subst(/^.+'::'(.+)$/, {$0}), 'INITIALIZE', sprintf("%.3f", now - $init-start)) if %*ENV<HIPH_INIT>;
-    self;
-}
-
-method load () {
-    return self             if $!loaded;
-    self.init               unless $!initialized;
-    self.config.diag.post:  self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
-    my $load-start          = now;
-    my @entries             = self.etl-branches(:TAG<entry>, :$!xml);
-    my @promises;
-    for @!Virtual-IO-Server-Ids -> $id {
-        @promises.push: start {
-            %!Virtual-IO-Servers{$id}.load;
-        }
-    }
-    unless await Promise.allof(@promises).then({ so all(@promises>>.result) }) {
-        die &?ROUTINE.name ~ ': Not all promises were Kept!';
-    }
     $!xml                   = Nil;
-    $!loaded                = True;
-    self.config.diag.post:  sprintf("%-20s %10s: %11s", self.^name.subst(/^.+'::'(.+)$/, {$0}), 'LOAD', sprintf("%.3f", now - $load-start)) if %*ENV<HIPH_LOAD>;
+    $!initialized           = True;
+    self.config.diag.post:  sprintf("%-20s %10s: %11s", self.^name.subst(/^.+'::'(.+)$/, {$0}), 'INITIALIZE', sprintf("%.3f", now - $init-start)) if %*ENV<HIPH_INIT>;
     self;
 }
 
@@ -109,3 +87,24 @@ method Virtual-IO-Server-by-Name (Str:D $Name is required) {
 }
  
 =finish
+
+#method load () {
+#    return self             if $!loaded;
+#    self.init               unless $!initialized;
+#    self.config.diag.post:  self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
+#    my $load-start          = now;
+#    my @entries             = self.etl-branches(:TAG<entry>, :$!xml);
+#    my @promises;
+#    for @!Virtual-IO-Server-Ids -> $id {
+#        @promises.push: start {
+#            %!Virtual-IO-Servers{$id}.load;
+#        }
+#    }
+#    unless await Promise.allof(@promises).then({ so all(@promises>>.result) }) {
+#        die &?ROUTINE.name ~ ': Not all promises were Kept!';
+#    }
+#    $!xml                   = Nil;
+#    $!loaded                = True;
+#    self.config.diag.post:  sprintf("%-20s %10s: %11s", self.^name.subst(/^.+'::'(.+)$/, {$0}), 'LOAD', sprintf("%.3f", now - $load-start)) if %*ENV<HIPH_LOAD>;
+#    self;
+#}
