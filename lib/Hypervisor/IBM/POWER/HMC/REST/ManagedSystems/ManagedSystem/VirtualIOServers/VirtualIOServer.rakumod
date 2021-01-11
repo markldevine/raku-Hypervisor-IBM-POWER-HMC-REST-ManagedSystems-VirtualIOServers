@@ -123,8 +123,8 @@ submethod TWEAK {
 method init () {
     return self                                 if $!initialized;
     self.config.diag.post:                      self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
-    $xml-content                                = self.etl-branch(:TAG<content>,                                            :$!xml);
-    $xml-VirtualIOServer                        = self.etl-branch(:TAG<VirtualIOServer:VirtualIOServer>,                    :xml($xml-content));
+    my $xml-content                             = self.etl-branch(:TAG<content>,                                            :$!xml);
+    my $xml-VirtualIOServer                     = self.etl-branch(:TAG<VirtualIOServer:VirtualIOServer>,                    :xml($xml-content));
     $!atom                                      = self.etl-atom(:xml(self.etl-branch(:TAG<Metadata>,                        :xml($xml-VirtualIOServer))))           if self.attribute-is-accessed(self.^name, 'atom');
     $!id                                        = self.etl-text(:TAG<id>,                                                   :$!xml);
     $!published                                 = DateTime.new(self.etl-text(:TAG<published>,                               :$!xml))                                if self.attribute-is-accessed(self.^name, 'published');
@@ -144,25 +144,25 @@ method init () {
     $!LogicalSerialNumber                       = self.etl-text(:TAG<LogicalSerialNumber>,                                  :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'LogicalSerialNumber');
     $!OperatingSystemVersion                    = self.etl-text(:TAG<OperatingSystemVersion>,                               :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'OperatingSystemVersion');
     if self.attribute-is-accessed(self.^name, 'PartitionCapabilities') {
-        $xml-PartitionCapabilities              = self.etl-branch(:TAG<PartitionCapabilities>,                              :xml($xml-VirtualIOServer));
+        my $xml-PartitionCapabilities           = self.etl-branch(:TAG<PartitionCapabilities>,                              :xml($xml-VirtualIOServer));
         $!PartitionCapabilities                 = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionCapabilities.new(:$!config, :xml($xml-PartitionCapabilities));
     }
     $!PartitionID                               = self.etl-text(:TAG<PartitionID>,                                          :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'PartitionID');
     if self.attribute-is-accessed(self.^name, 'PartitionIOConfiguration') {
-        $xml-PartitionIOConfiguration           = self.etl-branch(:TAG<PartitionIOConfiguration>,                           :xml($xml-VirtualIOServer));
+        my $xml-PartitionIOConfiguration        = self.etl-branch(:TAG<PartitionIOConfiguration>,                           :xml($xml-VirtualIOServer));
         $!PartitionIOConfiguration              = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration.new(:$!config, :xml($xml-PartitionIOConfiguration));
     }
     if self.attribute-is-accessed(self.^name, 'PartitionMemoryConfiguration') {
-        $xml-PartitionMemoryConfiguration       = self.etl-branch(:TAG<PartitionMemoryConfiguration>,                       :xml($xml-VirtualIOServer));
+        my $xml-PartitionMemoryConfiguration    = self.etl-branch(:TAG<PartitionMemoryConfiguration>,                       :xml($xml-VirtualIOServer));
         $!PartitionMemoryConfiguration          = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionMemoryConfiguration.new(:$!config, :xml($xml-PartitionMemoryConfiguration));
     }
     $!PartitionName                             = self.etl-text(:TAG<PartitionName>,                                        :xml($xml-VirtualIOServer));
     if self.attribute-is-accessed(self.^name, 'PartitionProcessorConfiguration') {
-        $xml-PartitionProcessorConfiguration    = self.etl-branch(:TAG<PartitionProcessorConfiguration>,                    :xml($xml-VirtualIOServer));
+        my $xml-PartitionProcessorConfiguration = self.etl-branch(:TAG<PartitionProcessorConfiguration>,                    :xml($xml-VirtualIOServer));
         $!PartitionProcessorConfiguration       = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionProcessorConfiguration.new(:$!config, :xml($xml-PartitionProcessorConfiguration));
     }
     if self.attribute-is-accessed(self.^name, 'PartitionProfiles') {
-        $xml-PartitionProfiles                  = self.etl-branch(:TAG<PartitionProfiles>,                                   :xml($xml-VirtualIOServer));
+        my $xml-PartitionProfiles               = self.etl-branch(:TAG<PartitionProfiles>,                                   :xml($xml-VirtualIOServer));
         @!PartitionProfiles                     = self.etl-links-URIs(:xml(self.etl-branch(:TAG<PartitionProfiles>,         :xml($xml-VirtualIOServer))));
     }
     $!PartitionState                            = self.etl-text(:TAG<PartitionState>,                                       :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'PartitionState');
@@ -177,11 +177,11 @@ method init () {
     $!ResourceMonitoringIPAddress               = self.etl-text(:TAG<ResourceMonitoringIPAddress>,                          :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'ResourceMonitoringIPAddress');
     $!AssociatedManagedSystem                   = self.etl-href(:xml(self.etl-branch(:TAG<AssociatedManagedSystem>,         :xml($xml-VirtualIOServer))))           if self.attribute-is-accessed(self.^name, 'AssociatedManagedSystem');
     if self.attribute-is-accessed(self.^name, 'SRIOVEthernetLogicalPorts') {
-        $xml-SRIOVEthernetLogicalPorts          = self.etl-branch(:TAG<SRIOVEthernetLogicalPorts>,          :xml($xml-VirtualIOServer));
+        my $xml-SRIOVEthernetLogicalPorts       = self.etl-branch(:TAG<SRIOVEthernetLogicalPorts>,          :xml($xml-VirtualIOServer));
         @!SRIOVEthernetLogicalPorts             = self.etl-links-URIs(:xml(self.etl-branch(:TAG<SRIOVEthernetLogicalPorts>, :xml($xml-VirtualIOServer))));
     }
     if self.attribute-is-accessed(self.^name, 'HostEthernetAdapterLogicalPorts') {
-        $xml-HostEthernetAdapterLogicalPorts    = self.etl-branch(:TAG<HostEthernetAdapterLogicalPorts>,                    :xml($xml-VirtualIOServer));
+        my $xml-HostEthernetAdapterLogicalPorts = self.etl-branch(:TAG<HostEthernetAdapterLogicalPorts>,                    :xml($xml-VirtualIOServer));
         $!HostEthernetAdapterLogicalPorts       = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::HostEthernetAdapterLogicalPorts.new(:$!config, :xml($xml-HostEthernetAdapterLogicalPorts));
     }
     $!MACAddressPrefix                          = self.etl-text(:TAG<MACAddressPrefix>,                                     :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'MACAddressPrefix');
@@ -190,7 +190,7 @@ method init () {
     $!ReferenceCode                             = self.etl-text(:TAG<ReferenceCode>,                                        :xml($xml-VirtualIOServer), :optional)  if self.attribute-is-accessed(self.^name, 'ReferenceCode');
     $!AssignAllResources                        = self.etl-text(:TAG<AssignAllResources>,                                   :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'AssignAllResources');
     if self.attribute-is-accessed(self.^name, 'HardwareAcceleratorQoS') {
-        $xml-HardwareAcceleratorQoS             = self.etl-branch(:TAG<HardwareAcceleratorQoS>,                             :xml($xml-VirtualIOServer));
+        my $xml-HardwareAcceleratorQoS          = self.etl-branch(:TAG<HardwareAcceleratorQoS>,                             :xml($xml-VirtualIOServer));
         $!HardwareAcceleratorQoS                = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::HardwareAcceleratorQoS.new(:$!config, :xml($xml-HardwareAcceleratorQoS));
     }
     $!LastActivatedProfile                      = self.etl-text(:TAG<LastActivatedProfile>,                                 :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'LastActivatedProfile');
@@ -204,51 +204,51 @@ method init () {
     $!IsVNICCapable                             = self.etl-text(:TAG<IsVNICCapable>,                                        :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'IsVNICCapable');
     $!VNICFailOverCapable                       = self.etl-text(:TAG<VNICFailOverCapable>,                                  :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'VNICFailOverCapable');
     if self.attribute-is-accessed(self.^name, 'LinkAggregations') {
-        $xml-LinkAggregations                   = self.etl-branch(:TAG<LinkAggregations>,                   :xml($xml-VirtualIOServer));
+        my $xml-LinkAggregations                = self.etl-branch(:TAG<LinkAggregations>,                   :xml($xml-VirtualIOServer));
         @!LinkAggregations                      = self.etl-links-URIs(:xml(self.etl-branch(:TAG<LinkAggregations>,          :xml($xml-VirtualIOServer))));
     }
     $!ManagerPassthroughCapable                 = self.etl-text(:TAG<ManagerPassthroughCapable>,                            :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'ManagerPassthroughCapable');
     if self.attribute-is-accessed(self.^name, 'MediaRepositories') {
-        $xml-MediaRepositories                  = self.etl-branch(:TAG<MediaRepositories>,                                  :xml($xml-VirtualIOServer));
+        my $xml-MediaRepositories               = self.etl-branch(:TAG<MediaRepositories>,                                  :xml($xml-VirtualIOServer));
         $!MediaRepositories                     = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::MediaRepositories.new(:$!config, :xml($xml-MediaRepositories));
     }
     $!MoverServicePartition                     = self.etl-text(:TAG<MoverServicePartition>,                                :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'MoverServicePartition');
     if self.attribute-is-accessed(self.^name, 'PhysicalVolumes') {
-        $xml-PhysicalVolumes                    = self.etl-branch(:TAG<PhysicalVolumes>,                                    :xml($xml-VirtualIOServer));
+        my $xml-PhysicalVolumes                 = self.etl-branch(:TAG<PhysicalVolumes>,                                    :xml($xml-VirtualIOServer));
         $!PhysicalVolumes                       = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PhysicalVolumes.new(:$!config, :xml($xml-PhysicalVolumes));
     }
     if self.attribute-is-accessed(self.^name, 'SharedEthernetAdapters') {
-        $xml-SharedEthernetAdapters             = self.etl-branch(:TAG<SharedEthernetAdapters>,                             :xml($xml-VirtualIOServer));
+        my $xml-SharedEthernetAdapters          = self.etl-branch(:TAG<SharedEthernetAdapters>,                             :xml($xml-VirtualIOServer));
         $!SharedEthernetAdapters                = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters.new(:$!config, :xml($xml-SharedEthernetAdapters));
     }
     @!StoragePools                              = self.etl-links-URIs(:xml(self.etl-branch(:TAG<StoragePools>,              :xml($xml-VirtualIOServer))))           if self.attribute-is-accessed(self.^name, 'StoragePools');
     if self.attribute-is-accessed(self.^name, 'TrunkAdapters') {
-        $xml-TrunkAdapters                      = self.etl-branch(:TAG<TrunkAdapters>,                                      :xml($xml-VirtualIOServer));
+        my $xml-TrunkAdapters                   = self.etl-branch(:TAG<TrunkAdapters>,                                      :xml($xml-VirtualIOServer));
         $!TrunkAdapters                         = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::TrunkAdapters.new(:$!config, :xml($xml-TrunkAdapters));
     }
     $!VirtualIOServerLicenseAccepted            = self.etl-text(:TAG<VirtualIOServerLicenseAccepted>,                       :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'VirtualIOServerLicenseAccepted');
     if self.attribute-is-accessed(self.^name, 'VirtualFibreChannelMappings') {
-        $xml-VirtualFibreChannelMappings        = self.etl-branch(:TAG<VirtualFibreChannelMappings>,                        :xml($xml-VirtualIOServer));
+        my $xml-VirtualFibreChannelMappings     = self.etl-branch(:TAG<VirtualFibreChannelMappings>,                        :xml($xml-VirtualIOServer));
         $!VirtualFibreChannelMappings           = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::VirtualFibreChannelMappings.new(:$!config, :xml($xml-VirtualFibreChannelMappings));
     }
     if self.attribute-is-accessed(self.^name, 'VirtualSCSIMappings') {
-        $xml-VirtualSCSIMappings                = self.etl-branch(:TAG<VirtualSCSIMappings>,                                :xml($xml-VirtualIOServer));
+        my $xml-VirtualSCSIMappings             = self.etl-branch(:TAG<VirtualSCSIMappings>,                                :xml($xml-VirtualIOServer));
         $!VirtualSCSIMappings                   = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::VirtualSCSIMappings.new(:$!config, :xml($xml-VirtualSCSIMappings));
     }
     if self.attribute-is-accessed(self.^name, 'FreeIOAdaptersForLinkAggregation') {
-        $xml-FreeIOAdaptersForLinkAggregation   = self.etl-branch(:TAG<FreeIOAdaptersForLinkAggregation>,                   :xml($xml-VirtualIOServer));
+        my $xml-FreeIOAdaptersForLinkAggregation = self.etl-branch(:TAG<FreeIOAdaptersForLinkAggregation>,                  :xml($xml-VirtualIOServer));
         $!FreeIOAdaptersForLinkAggregation      = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::FreeIOAdaptersForLinkAggregation.new(:$!config, :xml($xml-FreeIOAdaptersForLinkAggregation));
     }
     if self.attribute-is-accessed(self.^name, 'FreeEthenetBackingDevicesForSEA') {
-        $xml-FreeEthenetBackingDevicesForSEA    = self.etl-branch(:TAG<FreeEthenetBackingDevicesForSEA>,                    :xml($xml-VirtualIOServer));
+        my $xml-FreeEthenetBackingDevicesForSEA = self.etl-branch(:TAG<FreeEthenetBackingDevicesForSEA>,                    :xml($xml-VirtualIOServer));
         $!FreeEthenetBackingDevicesForSEA       = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::FreeEthenetBackingDevicesForSEA.new(:$!config, :xml($xml-FreeEthenetBackingDevicesForSEA));
     }
     if self.attribute-is-accessed(self.^name, 'VirtualNICBackingDevices') {
-        $xml-VirtualNICBackingDevices           = self.etl-branch(:TAG<VirtualNICBackingDevices>,                           :xml($xml-VirtualIOServer));
+        my $xml-VirtualNICBackingDevices        = self.etl-branch(:TAG<VirtualNICBackingDevices>,                           :xml($xml-VirtualIOServer));
         $!VirtualNICBackingDevices              = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::VirtualNICBackingDevices.new(:$!config, :xml($xml-VirtualNICBackingDevices));
     }
     if self.attribute-is-accessed(self.^name, 'VirtualIOServerCapabilities') {
-        $xml-VirtualIOServerCapabilities        = self.etl-branch(:TAG<VirtualIOServerCapabilities>,                        :xml($xml-VirtualIOServer));
+        my $xml-VirtualIOServerCapabilities     = self.etl-branch(:TAG<VirtualIOServerCapabilities>,                        :xml($xml-VirtualIOServer));
         $!VirtualIOServerCapabilities           = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::VirtualIOServerCapabilities.new(:$!config, :xml($xml-VirtualIOServerCapabilities));
     }
     $!xml                                       = Nil;
