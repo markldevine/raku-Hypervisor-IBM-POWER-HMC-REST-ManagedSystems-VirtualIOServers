@@ -2,6 +2,7 @@ need    Hypervisor::IBM::POWER::HMC::REST::Config;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Analyze;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Dump;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Optimize;
+use     Hypervisor::IBM::POWER::HMC::REST::Config::Traits;
 need    Hypervisor::IBM::POWER::HMC::REST::ETL::XML;
 need    Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::MediaRepositories::VirtualMediaRepository;
 unit    class Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::MediaRepositories:api<1>:auth<Mark Devine (mark@markdevine.com)>
@@ -10,14 +11,12 @@ unit    class Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::
             does Hypervisor::IBM::POWER::HMC::REST::Config::Optimize
             does Hypervisor::IBM::POWER::HMC::REST::ETL::XML;
 
-my      Bool                                                                                                                                            $names-checked = False;
-my      Bool                                                                                                                                            $analyzed = False;
-my      Lock                                                                                                                                            $lock = Lock.new;
-
-has     Hypervisor::IBM::POWER::HMC::REST::Config                                                                                                       $.config is required;
-has     Bool                                                                                                                                            $.initialized = False;
-has     Bool                                                                                                                                            $.loaded = False;
-has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::MediaRepositories::VirtualMediaRepository  $.VirtualMediaRepository;
+my      Bool                                                                                                                                            $names-checked  = False;
+my      Bool                                                                                                                                            $analyzed       = False;
+my      Lock                                                                                                                                            $lock           = Lock.new;
+has     Hypervisor::IBM::POWER::HMC::REST::Config                                                                                                       $.config        is required;
+has     Bool                                                                                                                                            $.initialized   = False;
+has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::MediaRepositories::VirtualMediaRepository  $.VirtualMediaRepository    is conditional-initialization-attribute;
 
 method  xml-name-exceptions () { return set <Metadata>; }
 
@@ -36,20 +35,13 @@ submethod TWEAK {
 }
 
 method init () {
-    return self                 if $!initialized;
-    self.config.diag.post:      self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
-    $!VirtualMediaRepository    = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::MediaRepositories::VirtualMediaRepository.new(:$!config, :xml(self.etl-branch(:TAG<VirtualMediaRepository>, :$!xml, :optional)));
-    self.load                   if self.config.optimizations.init-load;
-    $!initialized               = True;
-    self;
-}
-
-method load () {
-    return self             if $!loaded;
-    self.config.diag.post:  self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
-    $!VirtualMediaRepository.load;
-    $!xml                   = Nil;
-    $!loaded                = True;
+    return self                     if $!initialized;
+    self.config.diag.post:          self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
+    if self.attribute-is-accessed(self.^name, 'VirtualMediaRepository') {
+        $!VirtualMediaRepository    = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::MediaRepositories::VirtualMediaRepository.new(:$!config, :xml(self.etl-branch(:TAG<VirtualMediaRepository>, :$!xml, :optional)));
+    }
+    $!xml                           = Nil;
+    $!initialized                   = True;
     self;
 }
 
