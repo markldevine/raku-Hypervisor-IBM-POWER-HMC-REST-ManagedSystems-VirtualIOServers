@@ -2,7 +2,6 @@ need    Hypervisor::IBM::POWER::HMC::REST::Config;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Analyze;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Dump;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Optimize;
-use     Hypervisor::IBM::POWER::HMC::REST::Config::Traits;
 need    Hypervisor::IBM::POWER::HMC::REST::ETL::XML;
 need    Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer;
 unit    class Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers:api<1>:auth<Mark Devine (mark@markdevine.com)>
@@ -17,7 +16,7 @@ my      Lock                                                                    
 has     Hypervisor::IBM::POWER::HMC::REST::Config                                                           $.config        is required;
 has     Bool                                                                                                $.initialized   = False;
 has                                                                                                         $.Managed-System-Id is required;
-has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer %.Virtual-IO-Servers    is conditional-initialization-attribute;
+has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer %.Virtual-IO-Servers;
 has                                                                                                         @.Virtual-IO-Server-Ids;
 has                                                                                                         %.Virtual-IO-Server-Name-to-Id;
 has                                                                                                         %.Id-to-Virtual-IO-Server-Name;
@@ -39,7 +38,6 @@ submethod TWEAK {
 
 method init () {
     return self             if $!initialized;
-    return self             unless self.attribute-is-accessed(self.^name, 'Virtual-IO-Servers');
     self.config.diag.post:  self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
     my $init-start          = now;
     my $fetch-start         = now;
