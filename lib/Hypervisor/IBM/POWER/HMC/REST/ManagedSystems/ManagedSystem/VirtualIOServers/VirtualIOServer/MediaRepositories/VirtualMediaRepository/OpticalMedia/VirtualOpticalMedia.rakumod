@@ -2,6 +2,7 @@ need    Hypervisor::IBM::POWER::HMC::REST::Config;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Analyze;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Dump;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Optimize;
+use     Hypervisor::IBM::POWER::HMC::REST::Config::Traits;
 need    Hypervisor::IBM::POWER::HMC::REST::ETL::XML;
 unit    class Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::MediaRepositories::VirtualMediaRepository::OpticalMedia::VirtualOpticalMedia:api<1>:auth<Mark Devine (mark@markdevine.com)>
             does Hypervisor::IBM::POWER::HMC::REST::Config::Analyze
@@ -9,18 +10,15 @@ unit    class Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::
             does Hypervisor::IBM::POWER::HMC::REST::Config::Optimize
             does Hypervisor::IBM::POWER::HMC::REST::ETL::XML;
 
-my      Bool                                        $names-checked = False;
-my      Bool                                        $analyzed = False;
-my      Lock                                        $lock = Lock.new;
-
-has     Hypervisor::IBM::POWER::HMC::REST::Config   $.config is required;
-has     Bool                                        $.initialized = False;
-has     Bool                                        $.loaded = False;
-
-has     Str                                         $.MediaName;
-has     Str                                         $.MediaUDID;
-has     Str                                         $.MountType;
-has     Str                                         $.Size;
+my      Bool                                        $names-checked  = False;
+my      Bool                                        $analyzed       = False;
+my      Lock                                        $lock           = Lock.new;
+has     Hypervisor::IBM::POWER::HMC::REST::Config   $.config        is required;
+has     Bool                                        $.initialized   = False;
+has     Str                                         $.MediaName     is conditional-initialization-attribute;
+has     Str                                         $.MediaUDID     is conditional-initialization-attribute;
+has     Str                                         $.MountType     is conditional-initialization-attribute;
+has     Str                                         $.Size          is conditional-initialization-attribute;
 
 method  xml-name-exceptions () { return set <Metadata>; }
 
@@ -41,20 +39,12 @@ submethod TWEAK {
 method init () {
     return self             if $!initialized;
     self.config.diag.post:  self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
-    self.load               if self.config.optimizations.init-load;
-    $!initialized           = True;
-    self;
-}
-
-method load () {
-    return self             if $!loaded;
-    self.config.diag.post:  self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
-    $!MediaName             = self.etl-text(:TAG<MediaName>,    :$!xml);
-    $!MediaUDID             = self.etl-text(:TAG<MediaUDID>,    :$!xml);
-    $!MountType             = self.etl-text(:TAG<MountType>,    :$!xml);
-    $!Size                  = self.etl-text(:TAG<Size>,         :$!xml);
+    $!MediaName             = self.etl-text(:TAG<MediaName>,    :$!xml) if self.attribute-is-accessed(self.^name, 'MediaName');
+    $!MediaUDID             = self.etl-text(:TAG<MediaUDID>,    :$!xml) if self.attribute-is-accessed(self.^name, 'MediaUDID');
+    $!MountType             = self.etl-text(:TAG<MountType>,    :$!xml) if self.attribute-is-accessed(self.^name, 'MountType');
+    $!Size                  = self.etl-text(:TAG<Size>,         :$!xml) if self.attribute-is-accessed(self.^name, 'Size');
     $!xml                   = Nil;
-    $!loaded                = True;
+    $!initialized           = True;
     self;
 }
 

@@ -2,28 +2,23 @@ need    Hypervisor::IBM::POWER::HMC::REST::Config;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Analyze;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Dump;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Optimize;
+use     Hypervisor::IBM::POWER::HMC::REST::Config::Traits;
 need    Hypervisor::IBM::POWER::HMC::REST::ETL::XML;
 need    Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIOAdapter::IOAdapter;
 need    Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIOAdapter::PhysicalFibreChannelAdapter;
-use     LibXML;
 unit    class Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIOAdapter:api<1>:auth<Mark Devine (mark@markdevine.com)>
             does Hypervisor::IBM::POWER::HMC::REST::Config::Analyze
             does Hypervisor::IBM::POWER::HMC::REST::Config::Dump
             does Hypervisor::IBM::POWER::HMC::REST::Config::Optimize
             does Hypervisor::IBM::POWER::HMC::REST::ETL::XML;
 
-my      Bool                                                                                                                                                                                                                            $names-checked = False;
-my      Bool                                                                                                                                                                                                                            $analyzed = False;
-my      Lock                                                                                                                                                                                                                            $lock = Lock.new;
-
-has     Hypervisor::IBM::POWER::HMC::REST::Config                                                                                                                                                                                       $.config is required;
-has     Bool                                                                                                                                                                                                                            $.initialized = False;
-has     Bool                                                                                                                                                                                                                            $.loaded = False;
-has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIOAdapter::IOAdapter                     $.IOAdapter;
-has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIOAdapter::PhysicalFibreChannelAdapter   $.PhysicalFibreChannelAdapter;
-
-has     LibXML::Element                                                                                                                                                                                                                 $!xml-IOAdapter;
-has     LibXML::Element                                                                                                                                                                                                                 $!xml-PhysicalFibreChannelAdapter;
+my      Bool                                                                                                                                                                                                                            $names-checked                  = False;
+my      Bool                                                                                                                                                                                                                            $analyzed                       = False;
+my      Lock                                                                                                                                                                                                                            $lock                           = Lock.new;
+has     Hypervisor::IBM::POWER::HMC::REST::Config                                                                                                                                                                                       $.config                        is required;
+has     Bool                                                                                                                                                                                                                            $.initialized                   = False;
+has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIOAdapter::IOAdapter                     $.IOAdapter                     is conditional-initialization-attribute;
+has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIOAdapter::PhysicalFibreChannelAdapter   $.PhysicalFibreChannelAdapter   is conditional-initialization-attribute;
 
 method  xml-name-exceptions () { return set <Metadata>; }
 
@@ -42,26 +37,18 @@ submethod TWEAK {
 }
 
 method init () {
-    return self                         if $!initialized;
-    self.config.diag.post:              self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
-    $!xml-IOAdapter                     = self.etl-branch(:TAG<IOAdapter>,                      :$!xml, :optional);
-    $!xml-PhysicalFibreChannelAdapter   = self.etl-branch(:TAG<PhysicalFibreChannelAdapter>,    :$!xml, :optional);
-    $!IOAdapter                         = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIOAdapter::IOAdapter.new(:$!config, :xml($!xml-IOAdapter))
-        if $!xml-IOAdapter;
-    $!PhysicalFibreChannelAdapter       = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIOAdapter::PhysicalFibreChannelAdapter.new(:$!config, :xml($!xml-PhysicalFibreChannelAdapter))
-        if $!xml-PhysicalFibreChannelAdapter;
-    self.load                           if self.config.optimizations.init-load;
-    $!initialized                       = True;
-    self;
-}
-
-method load () {
-    return self                         if $!loaded;
-    self.config.diag.post:              self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
-    $!IOAdapter.load                    if $!xml-IOAdapter;
-    $!PhysicalFibreChannelAdapter.load  if $!xml-PhysicalFibreChannelAdapter;
-    $!xml                               = Nil;
-    $!loaded                            = True;
+    return self                             if $!initialized;
+    self.config.diag.post:                  self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
+    if self.attribute-is-accessed(self.^name, 'IOAdapter') {
+        my $xml-IOAdapter                   = self.etl-branch(:TAG<IOAdapter>,                      :$!xml, :optional);
+        $!IOAdapter                         = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIOAdapter::IOAdapter.new(:$!config, :xml($xml-IOAdapter)) if $xml-IOAdapter;
+    }
+    if self.attribute-is-accessed(self.^name, 'PhysicalFibreChannelAdapter') {
+        my $xml-PhysicalFibreChannelAdapter = self.etl-branch(:TAG<PhysicalFibreChannelAdapter>,    :$!xml, :optional);
+        $!PhysicalFibreChannelAdapter       = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionIOConfiguration::ProfileIOSlots::ProfileIOSlot::AssociatedIOSlot::RelatedIOAdapter::PhysicalFibreChannelAdapter.new(:$!config, :xml($xml-PhysicalFibreChannelAdapter)) if $xml-PhysicalFibreChannelAdapter;
+    }
+    $!xml                                   = Nil;
+    $!initialized                           = True;
     self;
 }
 
