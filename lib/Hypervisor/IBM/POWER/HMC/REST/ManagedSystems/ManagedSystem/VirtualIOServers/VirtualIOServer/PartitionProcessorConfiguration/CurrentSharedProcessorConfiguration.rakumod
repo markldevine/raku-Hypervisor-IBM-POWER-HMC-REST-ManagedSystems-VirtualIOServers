@@ -2,6 +2,7 @@ need    Hypervisor::IBM::POWER::HMC::REST::Config;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Analyze;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Dump;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Optimize;
+use     Hypervisor::IBM::POWER::HMC::REST::Config::Traits;
 need    Hypervisor::IBM::POWER::HMC::REST::ETL::XML;
 unit    class Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::PartitionProcessorConfiguration::CurrentSharedProcessorConfiguration:api<1>:auth<Mark Devine (mark@markdevine.com)>
             does Hypervisor::IBM::POWER::HMC::REST::Config::Analyze
@@ -9,24 +10,21 @@ unit    class Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::
             does Hypervisor::IBM::POWER::HMC::REST::Config::Optimize
             does Hypervisor::IBM::POWER::HMC::REST::ETL::XML;
 
-my      Bool                                        $names-checked = False;
-my      Bool                                        $analyzed = False;
-my      Lock                                        $lock = Lock.new;
-
-has     Hypervisor::IBM::POWER::HMC::REST::Config   $.config is required;
-has     Bool                                        $.initialized = False;
-has     Bool                                        $.loaded = False;
-
-has     Str                                         $.AllocatedVirtualProcessors;
-has     Str                                         $.CurrentMaximumProcessingUnits;
-has     Str                                         $.CurrentMinimumProcessingUnits;
-has     Str                                         $.CurrentProcessingUnits;
-has     Str                                         $.CurrentSharedProcessorPoolID;
-has     Str                                         $.CurrentUncappedWeight;
-has     Str                                         $.CurrentMinimumVirtualProcessors;
-has     Str                                         $.CurrentMaximumVirtualProcessors;
-has     Str                                         $.RuntimeProcessingUnits;
-has     Str                                         $.RuntimeUncappedWeight;
+my      Bool                                        $names-checked                      = False;
+my      Bool                                        $analyzed                           = False;
+my      Lock                                        $lock                               = Lock.new;
+has     Hypervisor::IBM::POWER::HMC::REST::Config   $.config                            is required;
+has     Bool                                        $.initialized                       = False;
+has     Str                                         $.AllocatedVirtualProcessors        is conditional-initialization-attribute;
+has     Str                                         $.CurrentMaximumProcessingUnits     is conditional-initialization-attribute;
+has     Str                                         $.CurrentMinimumProcessingUnits     is conditional-initialization-attribute;
+has     Str                                         $.CurrentProcessingUnits            is conditional-initialization-attribute;
+has     Str                                         $.CurrentSharedProcessorPoolID      is conditional-initialization-attribute;
+has     Str                                         $.CurrentUncappedWeight             is conditional-initialization-attribute;
+has     Str                                         $.CurrentMinimumVirtualProcessors   is conditional-initialization-attribute;
+has     Str                                         $.CurrentMaximumVirtualProcessors   is conditional-initialization-attribute;
+has     Str                                         $.RuntimeProcessingUnits            is conditional-initialization-attribute;
+has     Str                                         $.RuntimeUncappedWeight             is conditional-initialization-attribute;
 
 method  xml-name-exceptions () { return set <Metadata>; }
 
@@ -45,28 +43,20 @@ submethod TWEAK {
 }
 
 method init () {
-    return self             if $!initialized;
-    self.config.diag.post:  self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
-    self.load               if self.config.optimizations.init-load;
-    $!initialized           = True;
-    self;
-}
-
-method load () {
-    return self                         if $!loaded;
+    return self                         if $!initialized;
     self.config.diag.post:              self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
-    $!AllocatedVirtualProcessors        = self.etl-text(:TAG<AllocatedVirtualProcessors>,       :$!xml);
-    $!CurrentMaximumProcessingUnits     = self.etl-text(:TAG<CurrentMaximumProcessingUnits>,    :$!xml);
-    $!CurrentMinimumProcessingUnits     = self.etl-text(:TAG<CurrentMinimumProcessingUnits>,    :$!xml);
-    $!CurrentProcessingUnits            = self.etl-text(:TAG<CurrentProcessingUnits>,           :$!xml);
-    $!CurrentSharedProcessorPoolID      = self.etl-text(:TAG<CurrentSharedProcessorPoolID>,     :$!xml);
-    $!CurrentUncappedWeight             = self.etl-text(:TAG<CurrentUncappedWeight>,            :$!xml);
-    $!CurrentMinimumVirtualProcessors   = self.etl-text(:TAG<CurrentMinimumVirtualProcessors>,  :$!xml);
-    $!CurrentMaximumVirtualProcessors   = self.etl-text(:TAG<CurrentMaximumVirtualProcessors>,  :$!xml);
-    $!RuntimeProcessingUnits            = self.etl-text(:TAG<RuntimeProcessingUnits>,           :$!xml);
-    $!RuntimeUncappedWeight             = self.etl-text(:TAG<RuntimeUncappedWeight>,            :$!xml);
+    $!AllocatedVirtualProcessors        = self.etl-text(:TAG<AllocatedVirtualProcessors>,       :$!xml) if self.attribute-is-accessed(self.^name, 'AllocatedVirtualProcessors');
+    $!CurrentMaximumProcessingUnits     = self.etl-text(:TAG<CurrentMaximumProcessingUnits>,    :$!xml) if self.attribute-is-accessed(self.^name, 'CurrentMaximumProcessingUnits');
+    $!CurrentMinimumProcessingUnits     = self.etl-text(:TAG<CurrentMinimumProcessingUnits>,    :$!xml) if self.attribute-is-accessed(self.^name, 'CurrentMinimumProcessingUnits');
+    $!CurrentProcessingUnits            = self.etl-text(:TAG<CurrentProcessingUnits>,           :$!xml) if self.attribute-is-accessed(self.^name, 'CurrentProcessingUnits');
+    $!CurrentSharedProcessorPoolID      = self.etl-text(:TAG<CurrentSharedProcessorPoolID>,     :$!xml) if self.attribute-is-accessed(self.^name, 'CurrentSharedProcessorPoolID');
+    $!CurrentUncappedWeight             = self.etl-text(:TAG<CurrentUncappedWeight>,            :$!xml) if self.attribute-is-accessed(self.^name, 'CurrentUncappedWeight');
+    $!CurrentMinimumVirtualProcessors   = self.etl-text(:TAG<CurrentMinimumVirtualProcessors>,  :$!xml) if self.attribute-is-accessed(self.^name, 'CurrentMinimumVirtualProcessors');
+    $!CurrentMaximumVirtualProcessors   = self.etl-text(:TAG<CurrentMaximumVirtualProcessors>,  :$!xml) if self.attribute-is-accessed(self.^name, 'CurrentMaximumVirtualProcessors');
+    $!RuntimeProcessingUnits            = self.etl-text(:TAG<RuntimeProcessingUnits>,           :$!xml) if self.attribute-is-accessed(self.^name, 'RuntimeProcessingUnits');
+    $!RuntimeUncappedWeight             = self.etl-text(:TAG<RuntimeUncappedWeight>,            :$!xml) if self.attribute-is-accessed(self.^name, 'RuntimeUncappedWeight');
     $!xml                               = Nil;
-    $!loaded                            = True;
+    $!initialized                       = True;
     self;
 }
 
