@@ -2,6 +2,7 @@ need    Hypervisor::IBM::POWER::HMC::REST::Config;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Analyze;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Dump;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Optimize;
+use     Hypervisor::IBM::POWER::HMC::REST::Config::Traits;
 need    Hypervisor::IBM::POWER::HMC::REST::ETL::XML;
 use     URI;
 unit    class Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::TrunkAdapters::TrunkAdapter:api<1>:auth<Mark Devine (mark@markdevine.com)>
@@ -13,27 +14,24 @@ unit    class Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::
 my      Bool                                        $names-checked = False;
 my      Bool                                        $analyzed = False;
 my      Lock                                        $lock = Lock.new;
-
 has     Hypervisor::IBM::POWER::HMC::REST::Config   $.config is required;
 has     Bool                                        $.initialized = False;
-has     Bool                                        $.loaded = False;
-
-has     Str                                         $.DynamicReconfigurationConnectorName;
-has     Str                                         $.LocationCode;
-has     Str                                         $.LocalPartitionID;
-has     Str                                         $.RequiredAdapter;
-has     Str                                         $.VariedOn;
-has     Str                                         $.VirtualSlotNumber;
-has     Str                                         $.AllowedOperatingSystemMACAddresses;
-has     Str                                         $.MACAddress;
-has     Str                                         $.PortVLANID;
-has     Str                                         $.QualityOfServicePriorityEnabled;
-has     Str                                         $.TaggedVLANSupported;
-has     URI                                         @.AssociatedVirtualSwitch;
-has     Str                                         $.VirtualSwitchID;
-has     Str                                         $.DeviceName;
-has     Str                                         $.TrunkPriority;
-has     Str                                         $.HCNID;
+has     Str                                         $.DynamicReconfigurationConnectorName   is conditional-initialization-attribute;
+has     Str                                         $.LocationCode                          is conditional-initialization-attribute;
+has     Str                                         $.LocalPartitionID                      is conditional-initialization-attribute;
+has     Str                                         $.RequiredAdapter                       is conditional-initialization-attribute;
+has     Str                                         $.VariedOn                              is conditional-initialization-attribute;
+has     Str                                         $.VirtualSlotNumber                     is conditional-initialization-attribute;
+has     Str                                         $.AllowedOperatingSystemMACAddresses    is conditional-initialization-attribute;
+has     Str                                         $.MACAddress                            is conditional-initialization-attribute;
+has     Str                                         $.PortVLANID                            is conditional-initialization-attribute;
+has     Str                                         $.QualityOfServicePriorityEnabled       is conditional-initialization-attribute;
+has     Str                                         $.TaggedVLANSupported                   is conditional-initialization-attribute;
+has     URI                                         @.AssociatedVirtualSwitch               is conditional-initialization-attribute;
+has     Str                                         $.VirtualSwitchID                       is conditional-initialization-attribute;
+has     Str                                         $.DeviceName                            is conditional-initialization-attribute;
+has     Str                                         $.TrunkPriority                         is conditional-initialization-attribute;
+has     Str                                         $.HCNID                                 is conditional-initialization-attribute;
 
 # HCNID not implemented
 
@@ -54,34 +52,26 @@ submethod TWEAK {
 }
 
 method init () {
-    return self             if $!initialized;
-    self.config.diag.post:  self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
-    self.load               if self.config.optimizations.init-load;
-    $!initialized           = True;
-    self;
-}
-
-method load () {
-    return self                             if $!loaded;
+    return self                             if $!initialized;
     self.config.diag.post:                  self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
-    $!DynamicReconfigurationConnectorName   = self.etl-text(:TAG<DynamicReconfigurationConnectorName>,                  :$!xml);
-    $!LocationCode                          = self.etl-text(:TAG<LocationCode>,                                         :$!xml);
-    $!LocalPartitionID                      = self.etl-text(:TAG<LocalPartitionID>,                                     :$!xml);
-    $!RequiredAdapter                       = self.etl-text(:TAG<RequiredAdapter>,                                      :$!xml);
-    $!VariedOn                              = self.etl-text(:TAG<VariedOn>,                                             :$!xml);
-    $!VirtualSlotNumber                     = self.etl-text(:TAG<VirtualSlotNumber>,                                    :$!xml);
-    $!AllowedOperatingSystemMACAddresses    = self.etl-text(:TAG<AllowedOperatingSystemMACAddresses>,                   :$!xml);
-    $!MACAddress                            = self.etl-text(:TAG<MACAddress>,                                           :$!xml);
-    $!PortVLANID                            = self.etl-text(:TAG<PortVLANID>,                                           :$!xml);
-    $!QualityOfServicePriorityEnabled       = self.etl-text(:TAG<QualityOfServicePriorityEnabled>,                      :$!xml);
-    $!TaggedVLANSupported                   = self.etl-text(:TAG<TaggedVLANSupported>,                                  :$!xml);
-    @!AssociatedVirtualSwitch               = self.etl-links-URIs(:xml(self.etl-branch(:TAG<AssociatedVirtualSwitch>,   :$!xml)));
-    $!VirtualSwitchID                       = self.etl-text(:TAG<VirtualSwitchID>,                                      :$!xml);
-    $!DeviceName                            = self.etl-text(:TAG<DeviceName>,                                           :$!xml);
-    $!TrunkPriority                         = self.etl-text(:TAG<TrunkPriority>,                                        :$!xml);
-    $!HCNID                                 = self.etl-text(:TAG<HCNID>,                                                :$!xml, :optional);
+    $!DynamicReconfigurationConnectorName   = self.etl-text(:TAG<DynamicReconfigurationConnectorName>,                  :$!xml)             if self.attribute-is-accessed(self.^name, 'DynamicReconfigurationConnectorName');
+    $!LocationCode                          = self.etl-text(:TAG<LocationCode>,                                         :$!xml)             if self.attribute-is-accessed(self.^name, 'LocationCode');
+    $!LocalPartitionID                      = self.etl-text(:TAG<LocalPartitionID>,                                     :$!xml)             if self.attribute-is-accessed(self.^name, 'LocalPartitionID');
+    $!RequiredAdapter                       = self.etl-text(:TAG<RequiredAdapter>,                                      :$!xml)             if self.attribute-is-accessed(self.^name, 'RequiredAdapter');
+    $!VariedOn                              = self.etl-text(:TAG<VariedOn>,                                             :$!xml)             if self.attribute-is-accessed(self.^name, 'VariedOn');
+    $!VirtualSlotNumber                     = self.etl-text(:TAG<VirtualSlotNumber>,                                    :$!xml)             if self.attribute-is-accessed(self.^name, 'VirtualSlotNumber');
+    $!AllowedOperatingSystemMACAddresses    = self.etl-text(:TAG<AllowedOperatingSystemMACAddresses>,                   :$!xml)             if self.attribute-is-accessed(self.^name, 'AllowedOperatingSystemMACAddresses');
+    $!MACAddress                            = self.etl-text(:TAG<MACAddress>,                                           :$!xml)             if self.attribute-is-accessed(self.^name, 'MACAddress');
+    $!PortVLANID                            = self.etl-text(:TAG<PortVLANID>,                                           :$!xml)             if self.attribute-is-accessed(self.^name, 'PortVLANID');
+    $!QualityOfServicePriorityEnabled       = self.etl-text(:TAG<QualityOfServicePriorityEnabled>,                      :$!xml)             if self.attribute-is-accessed(self.^name, 'QualityOfServicePriorityEnabled');
+    $!TaggedVLANSupported                   = self.etl-text(:TAG<TaggedVLANSupported>,                                  :$!xml)             if self.attribute-is-accessed(self.^name, 'TaggedVLANSupported');
+    @!AssociatedVirtualSwitch               = self.etl-links-URIs(:xml(self.etl-branch(:TAG<AssociatedVirtualSwitch>,   :$!xml)))           if self.attribute-is-accessed(self.^name, 'AssociatedVirtualSwitch');
+    $!VirtualSwitchID                       = self.etl-text(:TAG<VirtualSwitchID>,                                      :$!xml)             if self.attribute-is-accessed(self.^name, 'VirtualSwitchID');
+    $!DeviceName                            = self.etl-text(:TAG<DeviceName>,                                           :$!xml)             if self.attribute-is-accessed(self.^name, 'DeviceName');
+    $!TrunkPriority                         = self.etl-text(:TAG<TrunkPriority>,                                        :$!xml)             if self.attribute-is-accessed(self.^name, 'TrunkPriority');
+    $!HCNID                                 = self.etl-text(:TAG<HCNID>,                                                :$!xml, :optional)  if self.attribute-is-accessed(self.^name, 'HCNID');
     $!xml                                   = Nil;
-    $!loaded                                = True;
+    $!initialized                           = True;
     self;
 }
 

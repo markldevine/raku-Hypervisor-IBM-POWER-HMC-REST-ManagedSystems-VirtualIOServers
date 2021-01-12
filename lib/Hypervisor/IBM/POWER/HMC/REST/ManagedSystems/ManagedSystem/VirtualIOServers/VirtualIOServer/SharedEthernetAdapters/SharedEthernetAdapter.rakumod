@@ -2,6 +2,7 @@ need    Hypervisor::IBM::POWER::HMC::REST::Config;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Analyze;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Dump;
 need    Hypervisor::IBM::POWER::HMC::REST::Config::Optimize;
+use     Hypervisor::IBM::POWER::HMC::REST::Config::Traits;
 need    Hypervisor::IBM::POWER::HMC::REST::ETL::XML;
 need    Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::BackingDeviceChoice;
 need    Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::TrunkAdapters;
@@ -12,27 +13,24 @@ unit    class Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::
             does Hypervisor::IBM::POWER::HMC::REST::Config::Optimize
             does Hypervisor::IBM::POWER::HMC::REST::ETL::XML;
 
-my      Bool                                                                                                                                                                    $names-checked = False;
-my      Bool                                                                                                                                                                    $analyzed = False;
-my      Lock                                                                                                                                                                    $lock = Lock.new;
-
-has     Hypervisor::IBM::POWER::HMC::REST::Config                                                                                                                               $.config is required;
-has     Bool                                                                                                                                                                    $.initialized = False;
-has     Bool                                                                                                                                                                    $.loaded = False;
-
-has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::BackingDeviceChoice $.BackingDeviceChoice;
-has     Str                                                                                                                                                                     $.HighAvailabilityMode;
-has     Str                                                                                                                                                                     $.DeviceName;
-has     Str                                                                                                                                                                     $.JumboFramesEnabled;
-has     Str                                                                                                                                                                     $.PortVLANID;
-has     Str                                                                                                                                                                     $.QualityOfServiceMode;
-has     Str                                                                                                                                                                     $.QueueSize;
-has     Str                                                                                                                                                                     $.ThreadModeEnabled;
-has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::TrunkAdapters       $.TrunkAdapters;
-has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::IPInterface         $.IPInterface;
-has     Str                                                                                                                                                                     $.UniqueDeviceID;
-has     Str                                                                                                                                                                     $.LargeSend;
-has     Str                                                                                                                                                                     $.ConfigurationState;
+my      Bool                                                                                                                                                                    $names-checked          = False;
+my      Bool                                                                                                                                                                    $analyzed               = False;
+my      Lock                                                                                                                                                                    $lock                   = Lock.new;
+has     Hypervisor::IBM::POWER::HMC::REST::Config                                                                                                                               $.config                is required;
+has     Bool                                                                                                                                                                    $.initialized           = False;
+has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::BackingDeviceChoice $.BackingDeviceChoice   is conditional-initialization-attribute;
+has     Str                                                                                                                                                                     $.HighAvailabilityMode  is conditional-initialization-attribute;
+has     Str                                                                                                                                                                     $.DeviceName            is conditional-initialization-attribute;
+has     Str                                                                                                                                                                     $.JumboFramesEnabled    is conditional-initialization-attribute;
+has     Str                                                                                                                                                                     $.PortVLANID            is conditional-initialization-attribute;
+has     Str                                                                                                                                                                     $.QualityOfServiceMode  is conditional-initialization-attribute;
+has     Str                                                                                                                                                                     $.QueueSize             is conditional-initialization-attribute;
+has     Str                                                                                                                                                                     $.ThreadModeEnabled     is conditional-initialization-attribute;
+has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::TrunkAdapters       $.TrunkAdapters         is conditional-initialization-attribute;
+has     Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::IPInterface         $.IPInterface           is conditional-initialization-attribute;
+has     Str                                                                                                                                                                     $.UniqueDeviceID        is conditional-initialization-attribute;
+has     Str                                                                                                                                                                     $.LargeSend             is conditional-initialization-attribute;
+has     Str                                                                                                                                                                     $.ConfigurationState    is conditional-initialization-attribute;
 
 method  xml-name-exceptions () { return set <Metadata>; }
 
@@ -51,34 +49,29 @@ submethod TWEAK {
 }
 
 method init () {
-    return self             if $!initialized;
-    self.config.diag.post:  self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
-    $!BackingDeviceChoice   = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::BackingDeviceChoice.new(:$!config, :xml(self.etl-branch(:TAG<BackingDeviceChoice>, :$!xml)));
-    $!TrunkAdapters         = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::TrunkAdapters.new(:$!config, :xml(self.etl-branch(:TAG<TrunkAdapters>, :$!xml)));
-    $!IPInterface           = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::IPInterface.new(:$!config, :xml(self.etl-branch(:TAG<IPInterface>, :$!xml)));
-    self.load               if self.config.optimizations.init-load;
-    $!initialized           = True;
-    self;
-}
-
-method load () {
-    return self             if $!loaded;
-    self.config.diag.post: self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
-    $!BackingDeviceChoice.load;
-    $!TrunkAdapters.load;
-    $!IPInterface.load;
-    $!HighAvailabilityMode  = self.etl-text(:TAG<HighAvailabilityMode>, :$!xml);
-    $!DeviceName            = self.etl-text(:TAG<DeviceName>,           :$!xml);
-    $!JumboFramesEnabled    = self.etl-text(:TAG<JumboFramesEnabled>,   :$!xml);
-    $!PortVLANID            = self.etl-text(:TAG<PortVLANID>,           :$!xml);
-    $!QualityOfServiceMode  = self.etl-text(:TAG<QualityOfServiceMode>, :$!xml);
-    $!QueueSize             = self.etl-text(:TAG<QueueSize>,            :$!xml);
-    $!ThreadModeEnabled     = self.etl-text(:TAG<ThreadModeEnabled>,    :$!xml);
-    $!UniqueDeviceID        = self.etl-text(:TAG<UniqueDeviceID>,       :$!xml);
-    $!LargeSend             = self.etl-text(:TAG<LargeSend>,            :$!xml);
-    $!ConfigurationState    = self.etl-text(:TAG<ConfigurationState>,   :$!xml);
-    $!xml                   = Nil;
-    $!loaded                = True;
+    return self                 if $!initialized;
+    self.config.diag.post:      self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_METHOD>;
+    if self.attribute-is-accessed(self.^name, 'BackingDeviceChoice') {
+        $!BackingDeviceChoice   = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::BackingDeviceChoice.new(:$!config, :xml(self.etl-branch(:TAG<BackingDeviceChoice>, :$!xml)));
+    }
+    $!HighAvailabilityMode      = self.etl-text(:TAG<HighAvailabilityMode>, :$!xml) if self.attribute-is-accessed(self.^name, 'HighAvailabilityMode');
+    $!DeviceName                = self.etl-text(:TAG<DeviceName>,           :$!xml) if self.attribute-is-accessed(self.^name, 'DeviceName');
+    $!JumboFramesEnabled        = self.etl-text(:TAG<JumboFramesEnabled>,   :$!xml) if self.attribute-is-accessed(self.^name, 'JumboFramesEnabled');
+    $!PortVLANID                = self.etl-text(:TAG<PortVLANID>,           :$!xml) if self.attribute-is-accessed(self.^name, 'PortVLANID');
+    $!QualityOfServiceMode      = self.etl-text(:TAG<QualityOfServiceMode>, :$!xml) if self.attribute-is-accessed(self.^name, 'QualityOfServiceMode');
+    $!QueueSize                 = self.etl-text(:TAG<QueueSize>,            :$!xml) if self.attribute-is-accessed(self.^name, 'QueueSize');
+    $!ThreadModeEnabled         = self.etl-text(:TAG<ThreadModeEnabled>,    :$!xml) if self.attribute-is-accessed(self.^name, 'ThreadModeEnabled');
+    if self.attribute-is-accessed(self.^name, 'TrunkAdapters') {
+        $!TrunkAdapters         = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::TrunkAdapters.new(:$!config, :xml(self.etl-branch(:TAG<TrunkAdapters>, :$!xml)));
+    }
+    if self.attribute-is-accessed(self.^name, 'IPInterface') {
+        $!IPInterface           = Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::VirtualIOServers::VirtualIOServer::SharedEthernetAdapters::SharedEthernetAdapter::IPInterface.new(:$!config, :xml(self.etl-branch(:TAG<IPInterface>, :$!xml)));
+    }
+    $!UniqueDeviceID            = self.etl-text(:TAG<UniqueDeviceID>,       :$!xml) if self.attribute-is-accessed(self.^name, 'UniqueDeviceID');
+    $!LargeSend                 = self.etl-text(:TAG<LargeSend>,            :$!xml) if self.attribute-is-accessed(self.^name, 'LargeSend');
+    $!ConfigurationState        = self.etl-text(:TAG<ConfigurationState>,   :$!xml) if self.attribute-is-accessed(self.^name, 'ConfigurationState');
+    $!xml                       = Nil;
+    $!initialized               = True;
     self;
 }
 
