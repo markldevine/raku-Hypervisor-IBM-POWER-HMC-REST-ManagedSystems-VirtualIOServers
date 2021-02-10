@@ -82,6 +82,7 @@ has     Str                                                                     
 has     Str                                                                                                                                     $.OperatingSystemType                   is conditional-initialization-attribute;
 has     Str                                                                                                                                     $.PendingSecureBoot                     is conditional-initialization-attribute;
 has     Str                                                                                                                                     $.CurrentSecureBoot                     is conditional-initialization-attribute;
+has     Str                                                                                                                                     $.BootMode                              is conditional-initialization-attribute;
 has     Str                                                                                                                                     $.PowerOnWithHypervisor                 is conditional-initialization-attribute;
 has     Str                                                                                                                                     $.Description                           is conditional-initialization-attribute;
 has     Str                                                                                                                                     $.APICapable                            is conditional-initialization-attribute;
@@ -123,7 +124,7 @@ method init () {
     my $xml-content                             = self.etl-branch(:TAG<content>,                                            :$!xml);
     my $xml-VirtualIOServer                     = self.etl-branch(:TAG<VirtualIOServer:VirtualIOServer>,                    :xml($xml-content));
 
-    my $proceed-with-name-check = False;
+    my $proceed-with-name-check                 = False;
     $lock.protect({
         if !$names-checked                      { $proceed-with-name-check = True; $names-checked = True; }
     });
@@ -202,6 +203,7 @@ method init () {
     $!OperatingSystemType                       = self.etl-text(:TAG<OperatingSystemType>,                                  :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'OperatingSystemType');
     $!PendingSecureBoot                         = self.etl-text(:TAG<PendingSecureBoot>,                                    :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'PendingSecureBoot');
     $!CurrentSecureBoot                         = self.etl-text(:TAG<CurrentSecureBoot>,                                    :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'CurrentSecureBoot');
+    $!BootMode                                  = self.etl-text(:TAG<BootMode>,                                             :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'BootMode');
     $!PowerOnWithHypervisor                     = self.etl-text(:TAG<PowerOnWithHypervisor>,                                :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'PowerOnWithHypervisor');
     $!Description                               = self.etl-text(:TAG<Description>,                                          :xml($xml-VirtualIOServer), :optional)  if self.attribute-is-accessed(self.^name, 'Description');
     $!APICapable                                = self.etl-text(:TAG<APICapable>,                                           :xml($xml-VirtualIOServer))             if self.attribute-is-accessed(self.^name, 'APICapable');
