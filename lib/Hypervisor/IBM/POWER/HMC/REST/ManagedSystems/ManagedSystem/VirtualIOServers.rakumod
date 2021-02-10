@@ -10,7 +10,7 @@ unit    class Hypervisor::IBM::POWER::HMC::REST::ManagedSystems::ManagedSystem::
             does Hypervisor::IBM::POWER::HMC::REST::Config::Optimize
             does Hypervisor::IBM::POWER::HMC::REST::ETL::XML;
 
-my      Bool                                                                                                $names-checked  = False;
+#my      Bool                                                                                                $names-checked  = False;
 my      Bool                                                                                                $analyzed       = False;
 my      Lock                                                                                                $lock           = Lock.new;
 has     Hypervisor::IBM::POWER::HMC::REST::Config                                                           $.config        is required;
@@ -25,13 +25,13 @@ method  xml-name-exceptions () { return set (); }
 
 submethod TWEAK {
     self.config.diag.post:      self.^name ~ '::' ~ &?ROUTINE.name if %*ENV<HIPH_SUBMETHOD>;
-    my $proceed-with-name-check = False;
+#   my $proceed-with-name-check = False;
     my $proceed-with-analyze    = False;
     $lock.protect({
         if !$analyzed           { $proceed-with-analyze    = True; $analyzed      = True; }
-        if !$names-checked      { $proceed-with-name-check = True; $names-checked = True; }
+#       if !$names-checked      { $proceed-with-name-check = True; $names-checked = True; }
     });
-    self.etl-node-name-check    if $proceed-with-name-check;
+#   self.etl-node-name-check    if $proceed-with-name-check;
     self.analyze                if $proceed-with-analyze;
     self;
 }
